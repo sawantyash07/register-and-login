@@ -4,6 +4,7 @@ import { Toaster } from 'react-hot-toast';
 import Register from './pages/Register';
 import Login from './pages/Login';
 import Quiz from './pages/Quiz';
+import Home from './pages/Home';
 import Landing from './pages/Landing';
 import ForgotPassword from './pages/ForgotPassword';
 import ProtectedRoute from './components/ProtectedRoute';
@@ -28,6 +29,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route element={<ProtectedRoute />}>
           <Route path="/quiz" element={<Quiz />} />
+          <Route path="/home" element={<Home />} />
         </Route>
       </Routes>
     </Router>

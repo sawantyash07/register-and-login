@@ -4,7 +4,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, Mail, Phone, Lock, Eye, EyeOff, Loader2, ShieldCheck, AlertCircle, ArrowLeft } from 'lucide-react';
-import AnimatedBackground from '../components/AnimatedBackground';
+import FluidBackground from '../components/FluidBackground';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -98,7 +98,7 @@ const Register = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 relative py-12">
-      <AnimatedBackground />
+      <FluidBackground />
 
       <motion.div
         initial={{ opacity: 0, y: 30 }}

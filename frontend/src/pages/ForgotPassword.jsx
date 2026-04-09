@@ -4,7 +4,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { Mail, Phone, Lock, Eye, EyeOff, Loader2, ArrowLeft, ShieldAlert } from 'lucide-react';
-import AnimatedBackground from '../components/AnimatedBackground';
+import FluidBackground from '../components/FluidBackground';
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
@@ -37,7 +37,7 @@ const ForgotPassword = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 relative">
-      <AnimatedBackground />
+      <FluidBackground />
 
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}

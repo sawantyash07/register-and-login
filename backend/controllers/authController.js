@@ -101,8 +101,67 @@ exports.resetPassword = async (req, res) => {
 // @route   GET /api/auth/me
 exports.getMe = async (req, res) => {
   try {
-    res.status(200).json({ valid: true, user: req.user });
+    const user = await User.findById(req.user.userId).select('-password');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json({ valid: true, user });
   } catch (error) {
     res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// @desc    Update User Profile
+// @route   PUT /api/auth/profile
+exports.updateProfile = async (req, res) => {
+  try {
+    const { aesthetic_style, mood_feel, budget, project } = req.body;
+    const userId = req.user.userId || req.user._id;
+
+    // Validate enum values
+    const validAestheticStyles = ['Minimalistic', 'Modern', 'Industrial', 'Maximalistic', 'Traditional', 'Vintage / Art Deco', 'Cottagecore'];
+    const validMoodFeels = ['Cosy & Inviting', 'Sleek & Modern', 'Serene & Calm', 'Rustic & Warm', 'Luxurious & Opulent', 'Natural & Organic'];
+    const validBudgets = ['Budget', 'Standard', 'Premium', 'Luxury'];
+
+    if (aesthetic_style && !validAestheticStyles.includes(aesthetic_style)) {
+      return res.status(400).json({ message: 'Invalid aesthetic style' });
+    }
+    if (mood_feel && !validMoodFeels.includes(mood_feel)) {
+      return res.status(400).json({ message: 'Invalid mood feel' });
+    }
+    if (budget && !validBudgets.includes(budget)) {
+      return res.status(400).json({ message: 'Invalid budget' });
+    }
+
+    const updateData = {};
+    if (aesthetic_style !== undefined) updateData.aesthetic_style = aesthetic_style;
+    if (mood_feel !== undefined) updateData.mood_feel = mood_feel;
+    if (budget !== undefined) updateData.budget = budget;
+    if (project !== undefined) updateData.project = project;
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json({
+      message: 'Profile updated successfully',
+      user: {
+        id: updatedUser._id,
+        username: updatedUser.username,
+        email: updatedUser.email,
+        aesthetic_style: updatedUser.aesthetic_style,
+        mood_feel: updatedUser.mood_feel,
+        budget: updatedUser.budget,
+        project: updatedUser.project
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error during profile update' });
   }
 };

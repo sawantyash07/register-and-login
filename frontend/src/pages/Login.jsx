@@ -4,7 +4,7 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, Loader2, ArrowRight } from 'lucide-react';
-import AnimatedBackground from '../components/AnimatedBackground';
+import FluidBackground from '../components/FluidBackground';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -34,17 +34,37 @@ const Login = () => {
       localStorage.setItem('token', response.data.token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
       
-      toast.success(`Welcome back, ${response.data.user.username}!`, {
-        icon: '🚀',
-        duration: 4000,
-        style: {
-          borderRadius: '15px',
-          background: '#1e293b',
-          color: '#fff',
-          border: '1px solid rgba(255,255,255,0.1)'
+      // Fetch full user data to check preferences
+      try {
+        const userResponse = await axios.get('/api/auth/me', {
+          headers: { Authorization: `Bearer ${response.data.token}` }
+        });
+        const userData = userResponse.data.user;
+        
+        // Check if user has completed quiz (all preferences set)
+        const hasCompletedQuiz = userData.aesthetic_style && userData.mood_feel && userData.budget;
+        
+        toast.success(`Welcome back, ${response.data.user.username}!`, {
+          icon: '🚀',
+          duration: 4000,
+          style: {
+            borderRadius: '15px',
+            background: '#1e293b',
+            color: '#fff',
+            border: '1px solid rgba(255,255,255,0.1)'
+          }
+        });
+        
+        // Navigate based on quiz completion
+        if (hasCompletedQuiz) {
+          navigate('/home');
+        } else {
+          navigate('/quiz');
         }
-      });
-      navigate('/quiz');
+      } catch (error) {
+        // If fetching user data fails, default to quiz
+        navigate('/quiz');
+      }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Unauthorized access', {
         duration: 4000,
@@ -67,7 +87,7 @@ const Login = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-6 relative">
-      <AnimatedBackground />
+      <FluidBackground />
 
       <motion.div
         initial={{ opacity: 0, scale: 0.9 }}
