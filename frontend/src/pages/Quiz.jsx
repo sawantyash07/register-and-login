@@ -106,10 +106,9 @@ const Quiz = () => {
 
           <div className="space-y-4">
             <h1 className="text-5xl md:text-8xl font-black text-white tracking-tighter">
-              Welcome, <br className="md:hidden" />
+              SYSTEM <br className="md:hidden" />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-secondary to-purple-400">
-                {displayText}
-                {isTyping && <span className="inline-block w-4 h-12 md:h-20 bg-primary ml-2 animate-pulse align-middle" />}
+                AUTHORIZED
               </span>
             </h1>
             <p className="text-white/40 text-lg md:text-2xl font-medium max-w-2xl mx-auto tracking-tight leading-relaxed">

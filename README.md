@@ -1,48 +1,48 @@
-# 🚀 Neural-Auth: Hackathon-Level Authentication System
+# 🚀 Neural-Auth: Modern & Secure Authentication System
 
-A visually stunning, production-ready authentication system with a dark-themed "Neural Core" aesthetic. Built for hackathons where UI excellence and backend reliability are paramount.
+A visually stunning, production-ready authentication system with a modern glassmorphism aesthetic. Built for performance and user experience, featuring a streamlined "Neural Core" design.
 
 ## 🌌 Features
 
-- **Modern UI/UX**: Dark theme with mesh gradients, glassmorphism, and animated blobs.
-- **Micro-interactions**: Interactive buttons with Framer Motion "squish & pop" effects.
-- **Identity Recovery**: Full "Forgot Password" flow with multi-factor identity verification (Email + Mobile).
-- **Secure Authentication**: JWT-based auth with bcrypt password hashing.
-- **Typewriter Animation**: Character-by-character greeting on the protected dashboard.
-- **MVC Architecture**: Scalable backend structure with separated Models, Controllers, and Routes.
-- **Social Login UI**: Placeholder buttons for Google and GitHub with brand-accurate SVGs.
+- **Modern & Simple UI**: Sleek dark theme with mesh gradients, glassmorphism, and interactive centered cards.
+- **Fast Navigation**: Instant page transitions for a snappy user experience.
+- **Streamlined Forms**: Standard, clear labels (Username, Contact, Email, Password) for ease of use.
+- **Centralized Feedback**: All flash messages and notifications are displayed in the top-center of the screen.
+- **Identity Recovery**: Secure "Forgot Password" flow with multi-factor verification (Email + Mobile).
+- **Secure Authentication**: JWT-based auth with bcrypt password hashing and robust regex validation.
+- **MVC Architecture**: Clean separation of concerns with Models, Controllers, and Routes.
 
 ## 🧠 Tech Stack
 
 ### Frontend
 - **React (Vite)**: Core framework.
-- **Tailwind CSS v4**: Professional styling.
-- **Framer Motion**: Advanced animations and haptics.
-- **Lucide React**: Clean vector iconography.
-- **React Hot Toast**: Beautiful, animated notifications.
-- **Axios**: Smooth API communication.
+- **Tailwind CSS v4**: Modern utility-first styling.
+- **Framer Motion**: Interactive hover effects and card entry animations.
+- **Lucide React**: Clean, consistent iconography.
+- **React Hot Toast**: Beautiful, centralized notifications.
+- **Axios**: API communication.
 
 ### Backend
 - **Node.js & Express**: Fast, scalable server environment.
-- **MongoDB Atlas**: Cloud-native database.
+- **MongoDB Atlas**: Cloud-native database integration.
 - **Mongoose**: Elegant ODM for schema-driven data.
-- **JSON Web Tokens (JWT)**: Secure stateless authentication.
+- **JSON Web Tokens (JWT)**: Secure stateless sessions.
 - **Bcrypt**: Industrial-grade password hashing.
 
 ## 📂 Project Structure
 ```
 ├── frontend/             # Vite + React Client
 │   ├── src/
-│   │   ├── components/   # Reusable UI (Background, ProtectedRoute)
+│   │   ├── components/   # UI Background & ProtectedRoute
 │   │   ├── pages/        # Login, Register, ForgotPassword, Quiz
-│   │   └── index.css     # Theme & Animations
+│   │   └── index.css     # Unified Design System
 ├── backend/              # Node.js + Express Server
-│   ├── config/           # DB Connections
-│   ├── controllers/      # Business Logic
-│   ├── models/           # User Schemas
-│   ├── routes/           # API Endpoints
-│   ├── middlewares/      # Auth Protection
-│   └── server.js         # Entry Point
+│   ├── config/           # Database Configuration
+│   ├── controllers/      # Auth & User Logic
+│   ├── models/           # Mongoose Schemas
+│   ├── routes/           # REST API Endpoints
+│   ├── middlewares/      # Protection layers
+│   └── server.js         # Server Entry Point
 ```
 
 ## 🚀 Getting Started
@@ -50,7 +50,7 @@ A visually stunning, production-ready authentication system with a dark-themed "
 ### 1. Backend Setup
 1. `cd backend`
 2. `npm install`
-3. Create a `.env` file:
+3. Create a `.env` file with your credentials:
    ```env
    MONGO_URI=your_mongodb_connection_string
    JWT_SECRET=your_jwt_secret
@@ -65,4 +65,5 @@ A visually stunning, production-ready authentication system with a dark-themed "
 
 ---
 
-Built with ❤️ for Synora by Antigravity.
+Developed for high-performance authentication workflows.
+Developed with ❤️.

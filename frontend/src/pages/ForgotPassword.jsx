@@ -20,8 +20,25 @@ const ForgotPassword = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const validate = () => {
+    if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      toast.error('Invalid neural-mail format');
+      return false;
+    }
+    if (!formData.mobile || !/^[0-9]{10,15}$/.test(formData.mobile)) {
+      toast.error('Mobile requires 10-15 digits');
+      return false;
+    }
+    if (!formData.newPassword || formData.newPassword.length < 8) {
+      toast.error('Access key must be at least 8 characters');
+      return false;
+    }
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validate()) return;
     setLoading(true);
 
     try {
