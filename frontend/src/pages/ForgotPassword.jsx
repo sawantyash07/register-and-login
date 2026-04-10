@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import API from '../api/axios';
 import toast from 'react-hot-toast';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Mail, Phone, Lock, Eye, EyeOff, Loader2, ArrowLeft, ShieldAlert } from 'lucide-react';
 import AnimatedBackground from '../components/AnimatedBackground';
 import CenteredAlert from '../components/CenteredAlert';
@@ -12,11 +12,26 @@ const ForgotPassword = () => {
   const [loading, setLoading] = useState(false);
   const [alert, setAlert] = useState({ show: false, message: '', type: 'error' });
   const [showPassword, setShowPassword] = useState(false);
+  const [passwordStrength, setPasswordStrength] = useState(0);
   const [formData, setFormData] = useState({
     email: '',
     mobile: '',
     newPassword: ''
   });
+
+  useEffect(() => {
+    const calcStrength = (pass) => {
+      let score = 0;
+      if (!pass) return 0;
+      if (pass.length > 6) score += 1;
+      if (pass.length > 10) score += 1;
+      if (/[A-Z]/.test(pass)) score += 1;
+      if (/[0-9]/.test(pass)) score += 1;
+      if (/[^A-Za-z0-9]/.test(pass)) score += 1;
+      return score;
+    };
+    setPasswordStrength(calcStrength(formData.newPassword));
+  }, [formData.newPassword]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -152,6 +167,69 @@ const ForgotPassword = () => {
                 </button>
               </div>
             </div>
+
+            {/* Password Strength Indicator */}
+            <AnimatePresence>
+              {formData.newPassword && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-3 px-1"
+                >
+                  <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                    <span className="text-white/20">Entropy Analysis</span>
+                    <motion.span 
+                      key={passwordStrength}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      style={{ 
+                        color: 
+                          passwordStrength === 1 ? '#ef4444' : 
+                          passwordStrength === 2 ? '#f97316' : 
+                          passwordStrength === 3 ? '#eab308' : 
+                          passwordStrength === 4 ? '#3b82f6' : 
+                          '#22c55e'
+                      }}
+                    >
+                      {passwordStrength <= 1 ? 'Critical' : 
+                       passwordStrength === 2 ? 'Weak' : 
+                       passwordStrength === 3 ? 'Fair' : 
+                       passwordStrength === 4 ? 'Good' : 'Strong'}
+                    </motion.span>
+                  </div>
+                  <div className="flex gap-2 h-1.5">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="flex-1 h-full bg-white/5 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ 
+                            width: i < passwordStrength ? '100%' : '0%',
+                            backgroundColor: 
+                              passwordStrength === 1 ? '#ef4444' : 
+                              passwordStrength === 2 ? '#f97316' : 
+                              passwordStrength === 3 ? '#eab308' : 
+                              passwordStrength === 4 ? '#3b82f6' : 
+                              '#22c55e'
+                          }}
+                          transition={{ duration: 0.4, delay: i * 0.1 }}
+                          className="h-full"
+                          style={{
+                            boxShadow: i < passwordStrength ? `0 0 10px ${
+                              passwordStrength === 1 ? '#ef4444' : 
+                              passwordStrength === 2 ? '#f97316' : 
+                              passwordStrength === 3 ? '#eab308' : 
+                              passwordStrength === 4 ? '#3b82f6' : 
+                              '#22c55e'
+                            }44` : 'none'
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <motion.button
               whileHover={{ scale: 1.02 }}
