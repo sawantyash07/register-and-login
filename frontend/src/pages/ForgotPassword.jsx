@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import API from '../api/axios';
 import toast from 'react-hot-toast';
 import { motion } from 'framer-motion';
 import { Mail, Phone, Lock, Eye, EyeOff, Loader2, ArrowLeft, ShieldAlert } from 'lucide-react';
 import AnimatedBackground from '../components/AnimatedBackground';
+import CenteredAlert from '../components/CenteredAlert';
 
 const ForgotPassword = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState({ show: false, message: '', type: 'error' });
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
@@ -22,7 +24,7 @@ const ForgotPassword = () => {
 
   const validate = () => {
     if (!formData.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      toast.error('Invalid neural-mail format');
+      toast.error('Invalid email format');
       return false;
     }
     if (!formData.mobile || !/^[0-9]{10,15}$/.test(formData.mobile)) {
@@ -30,7 +32,7 @@ const ForgotPassword = () => {
       return false;
     }
     if (!formData.newPassword || formData.newPassword.length < 8) {
-      toast.error('Access key must be at least 8 characters');
+      toast.error('Password must be at least 8 characters');
       return false;
     }
     return true;
@@ -42,11 +44,19 @@ const ForgotPassword = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post('/api/auth/reset-password', formData);
-      toast.success(response.data.message, { icon: '🔑' });
-      navigate('/login');
+      const response = await API.post('/api/auth/reset-password', formData);
+      setAlert({
+        show: true,
+        message: 'IDENTITY KEY UPDATED. ACCESS RESTORED.',
+        type: 'success'
+      });
+      setTimeout(() => navigate('/login'), 3000);
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Verification failed');
+      setAlert({
+        show: true,
+        message: error.response?.data?.message || 'VERIFICATION FAILED. CORE DATA MISMATCH.',
+        type: 'error'
+      });
     } finally {
       setLoading(false);
     }
@@ -55,6 +65,13 @@ const ForgotPassword = () => {
   return (
     <div className="min-h-screen flex items-center justify-center p-6 relative">
       <AnimatedBackground />
+
+      <CenteredAlert 
+        isOpen={alert.show} 
+        onClose={() => setAlert({ ...alert, show: false })} 
+        message={alert.message} 
+        type={alert.type} 
+      />
 
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}

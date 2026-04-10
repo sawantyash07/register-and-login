@@ -1,5 +1,4 @@
 const User = require('../models/User');
-const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 // @desc    Register new user
@@ -8,30 +7,26 @@ exports.register = async (req, res) => {
   try {
     const { username, email, mobile, password } = req.body;
 
-    // 1. Basic Presence Validation
+    // Validation
     if (!username || !email || !mobile || !password) {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
-    // 2. Username Validation (Alphanumeric, 3-20 chars)
     const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
     if (!usernameRegex.test(username)) {
       return res.status(400).json({ message: 'Username must be 3-20 alphanumeric characters' });
     }
 
-    // 3. Email Validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ message: 'Invalid email format' });
     }
 
-    // 4. Mobile Validation (Basic digit check 10-15 digits)
     const mobileRegex = /^[0-9]{10,15}$/;
     if (!mobileRegex.test(mobile)) {
       return res.status(400).json({ message: 'Mobile requires 10-15 digits' });
     }
 
-    // 5. Password Validation (Min 8 chars)
     if (password.length < 8) {
       return res.status(400).json({ message: 'Password must be at least 8 characters' });
     }
@@ -41,14 +36,11 @@ exports.register = async (req, res) => {
       return res.status(409).json({ message: 'User already exists' });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
     const newUser = new User({
       username,
       email,
       mobile,
-      password: hashedPassword
+      password
     });
 
     await newUser.save();
@@ -65,16 +57,19 @@ exports.login = async (req, res) => {
     const { identifier, password } = req.body;
 
     if (!identifier || !password) {
-      return res.status(400).json({ message: 'Identification required' });
+      return res.status(400).json({ message: 'Identification and password required' });
     }
 
     const user = await User.findOne({
       $or: [{ email: identifier }, { username: identifier }]
     });
 
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      return res.status(401).json({ message: 'Invalid credentials. Access denied.' });
+    if (!user || !(await user.comparePassword(password))) {
+      return res.status(401).json({ message: 'Invalid credentials' });
     }
+
+    user.lastLogin = Date.now();
+    await user.save();
 
     const token = jwt.sign(
       { userId: user._id, username: user.username },
@@ -103,38 +98,20 @@ exports.resetPassword = async (req, res) => {
     const { email, mobile, newPassword } = req.body;
 
     if (!email || !mobile || !newPassword) {
-      return res.status(400).json({ message: 'All telemetry fields are required' });
-    }
-
-    // Email Validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({ message: 'Invalid neural-mail format' });
-    }
-
-    // Mobile Validation
-    const mobileRegex = /^[0-9]{10,15}$/;
-    if (!mobileRegex.test(mobile)) {
-      return res.status(400).json({ message: 'Mobile requires 10-15 digits' });
-    }
-
-    // Password Validation
-    if (newPassword.length < 8) {
-      return res.status(400).json({ message: 'New security key must be at least 8 characters' });
+      return res.status(400).json({ message: 'All fields are required' });
     }
 
     const user = await User.findOne({ email, mobile });
     if (!user) {
-      return res.status(404).json({ message: 'Identity verification failed. Information mismatch.' });
+      return res.status(404).json({ message: 'Information mismatch' });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(newPassword, salt);
+    user.password = newPassword;
     await user.save();
 
-    res.status(200).json({ message: 'Identity key updated successfully' });
+    res.status(200).json({ message: 'Password updated successfully' });
   } catch (error) {
-    res.status(500).json({ message: 'Recovery failure' });
+    res.status(500).json({ message: 'Password reset failure' });
   }
 };
 

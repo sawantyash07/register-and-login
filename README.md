@@ -1,69 +1,77 @@
-# 🚀 Neural-Auth: Modern & Secure Authentication System
+# Synora Neural Systems - Authentication & Authorization
 
-A visually stunning, production-ready authentication system with a modern glassmorphism aesthetic. Built for performance and user experience, featuring a streamlined "Neural Core" design.
+A high-performance, full-stack authentication system built with **React**, **Node.js**, **Express**, and **MongoDB**. This project features a modern, interactive UI with "Neural Core" aesthetics, robust security protocols, and comprehensive session management.
 
-## 🌌 Features
+## 🚀 Features
 
-- **Modern & Simple UI**: Sleek dark theme with mesh gradients, glassmorphism, and interactive centered cards.
-- **Fast Navigation**: Instant page transitions for a snappy user experience.
-- **Streamlined Forms**: Standard, clear labels (Username, Contact, Email, Password) for ease of use.
-- **Centralized Feedback**: All flash messages and notifications are displayed in the top-center of the screen.
-- **Identity Recovery**: Secure "Forgot Password" flow with multi-factor verification (Email + Mobile).
-- **Secure Authentication**: JWT-based auth with bcrypt password hashing and robust regex validation.
-- **MVC Architecture**: Clean separation of concerns with Models, Controllers, and Routes.
+- **🛡️ Secure Auth**: Password hashing with `bcrypt` and session management via `JWT`.
+- **🎭 Multi-tier Roles**: Integrated Role-Based Access Control (RBAC) (User/Admin).
+- **🌈 Interactive Strength Meter**: Multi-color, animated password entropy analyzer.
+- **🚨 Centralized Alerts**: Custom glassmorphism-styled centered flash messages.
+- **🔄 Identity Recovery**: Fully functional forgot-password flow with identity verification.
+- **🌐 Dashboard Navigation**: Protected routes and automatic session-state detection.
+- **💎 Premium UI**: Built with Framer Motion, Lucide Icons, and Glassmorphism design principles.
 
-## 🧠 Tech Stack
+## 🛠️ Project Structure
 
-### Frontend
-- **React (Vite)**: Core framework.
-- **Tailwind CSS v4**: Modern utility-first styling.
-- **Framer Motion**: Interactive hover effects and card entry animations.
-- **Lucide React**: Clean, consistent iconography.
-- **React Hot Toast**: Beautiful, centralized notifications.
-- **Axios**: API communication.
-
-### Backend
-- **Node.js & Express**: Fast, scalable server environment.
-- **MongoDB Atlas**: Cloud-native database integration.
-- **Mongoose**: Elegant ODM for schema-driven data.
-- **JSON Web Tokens (JWT)**: Secure stateless sessions.
-- **Bcrypt**: Industrial-grade password hashing.
-
-## 📂 Project Structure
-```
-├── frontend/             # Vite + React Client
-│   ├── src/
-│   │   ├── components/   # UI Background & ProtectedRoute
-│   │   ├── pages/        # Login, Register, ForgotPassword, Quiz
-│   │   └── index.css     # Unified Design System
-├── backend/              # Node.js + Express Server
-│   ├── config/           # Database Configuration
-│   ├── controllers/      # Auth & User Logic
-│   ├── models/           # Mongoose Schemas
-│   ├── routes/           # REST API Endpoints
-│   ├── middlewares/      # Protection layers
-│   └── server.js         # Server Entry Point
+```bash
+├── backend/            # Express.js Server & MongoDB Models
+└── frontend/           # Vite + React + TailwindCSS SPA
 ```
 
-## 🚀 Getting Started
+## 🏁 Getting Started
+
+### Prerequisites
+- Node.js (v18+)
+- MongoDB (Local or Atlas)
+- NPM or Yarn
 
 ### 1. Backend Setup
-1. `cd backend`
-2. `npm install`
-3. Create a `.env` file with your credentials:
-   ```env
-   MONGO_URI=your_mongodb_connection_string
-   JWT_SECRET=your_jwt_secret
-   PORT=5000
+1. Navigate to the backend directory:
+   ```bash
+   cd backend
    ```
-4. `npm run dev`
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Create a `.env` file and add your credentials:
+   ```env
+   PORT=5000
+   MONGO_URI=your_mongodb_connection_string
+   JWT_SECRET=your_super_secret_key
+   ```
+4. Start the server (using nodemon):
+   ```bash
+   npm run dev
+   ```
 
 ### 2. Frontend Setup
-1. `cd frontend`
-2. `npm install`
-3. `npm run dev`
+1. Navigate to the frontend directory:
+   ```bash
+   cd frontend
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
+4. The application will be accessible at `http://localhost:5173`.
+
+## 📡 API Endpoints
+
+- **POST** `/api/auth/register`: Initialize new identity.
+- **POST** `/api/auth/login`: Authorize session & receive token.
+- **POST** `/api/auth/reset-password`: Update credentials via email/mobile verification.
+- **GET** `/api/auth/me`: Retrieve current authorized user data.
+
+## 🔒 Security Implementation
+- All sensitive passwords are salted and hashed before persistence.
+- JWT tokens are automatically injected into requests via Axios interceptors.
+- Server-side middleware protects sensitive routes and validates user roles.
 
 ---
-
-Developed for high-performance authentication workflows.
-Developed with ❤️.
+Built by [Yash Sawant](https://github.com/sawantyash07)

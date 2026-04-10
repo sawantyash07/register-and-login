@@ -4,22 +4,20 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { LogOut, LayoutGrid, Terminal, Cpu, Globe, Zap, Settings, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 import AnimatedBackground from '../components/AnimatedBackground';
+import { useAuth } from '../context/AuthContext';
 
 const Quiz = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState(null);
+  const { user: authUser, logout } = useAuth();
   const [displayText, setDisplayText] = useState('');
   const [isTyping, setIsTyping] = useState(true);
 
   useEffect(() => {
-    const storedUser = localStorage.getItem('user') || sessionStorage.getItem('user');
-    if (storedUser) {
-      const parsedUser = JSON.parse(storedUser);
-      setUser(parsedUser);
-      
+    if (authUser) {
       // Typewriter Effect Logic
       let i = 0;
-      const fullText = parsedUser.username || 'Agent';
+      const fullText = authUser.username || 'Agent';
+      setDisplayText(''); // Reset display text
       const typingInterval = setInterval(() => {
         if (i < fullText.length) {
           setDisplayText(prev => prev + fullText.charAt(i));
@@ -32,13 +30,10 @@ const Quiz = () => {
       
       return () => clearInterval(typingInterval);
     }
-  }, []);
+  }, [authUser]);
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    sessionStorage.removeItem('token');
-    sessionStorage.removeItem('user');
+    logout();
     toast.success('Session Terminated', {
       icon: '🔐',
       style: {
@@ -112,7 +107,7 @@ const Quiz = () => {
               </span>
             </h1>
             <p className="text-white/40 text-lg md:text-2xl font-medium max-w-2xl mx-auto tracking-tight leading-relaxed">
-              Your neural uplink is synchronized. Access Level: <span className="text-white/80">Command Authority</span>
+              Your neural uplink is synchronized. Access Level: <span className="text-white/80 uppercase">{authUser?.role || 'Command Authority'}</span>
             </p>
           </div>
 

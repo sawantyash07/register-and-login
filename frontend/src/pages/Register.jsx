@@ -1,18 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import API from '../api/axios';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
 import { User, Mail, Phone, Lock, Eye, EyeOff, Loader2, ShieldCheck, AlertCircle, ArrowLeft, UserCircle, Globe, Zap } from 'lucide-react';
 import AnimatedBackground from '../components/AnimatedBackground';
+import { useAuth } from '../context/AuthContext';
+import CenteredAlert from '../components/CenteredAlert';
 
 const Register = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState({ show: false, message: '', type: 'error' });
+
+  useEffect(() => {
+    if (user) navigate('/quiz');
+  }, [user, navigate]);
+
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [passwordStrength, setPasswordStrength] = useState(0);
-  
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -22,6 +28,7 @@ const Register = () => {
   });
 
   const [errors, setErrors] = useState({});
+  const [passwordStrength, setPasswordStrength] = useState(0);
 
   useEffect(() => {
     const calcStrength = (pass) => {
@@ -32,48 +39,20 @@ const Register = () => {
       if (/[A-Z]/.test(pass)) score += 1;
       if (/[0-9]/.test(pass)) score += 1;
       if (/[^A-Za-z0-9]/.test(pass)) score += 1;
-      return Math.min(5, score);
+      return score;
     };
     setPasswordStrength(calcStrength(formData.password));
   }, [formData.password]);
 
   const validate = () => {
     const newErrors = {};
-    
-    // Username validation
-    if (!formData.username) {
-      newErrors.username = "Username is required";
-    } else if (formData.username.length < 3) {
-      newErrors.username = "Minimum 3 characters required";
-    } else if (!/^[a-zA-Z0-9_]+$/.test(formData.username)) {
-      newErrors.username = "Alphanumeric characters only";
-    }
-
-    // Email validation
-    if (!formData.email) {
-      newErrors.email = "Email is required";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Invalid email format";
-    }
-
-    // Mobile validation
-    if (!formData.mobile) {
-      newErrors.mobile = "Mobile is required";
-    } else if (!/^[0-9]{10,15}$/.test(formData.mobile)) {
-      newErrors.mobile = "Requires 10-15 digits";
-    }
-
-    // Password validation
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    } else if (formData.password.length < 8) {
-      newErrors.password = "Minimum 8 characters required";
-    }
-
-    // Confirm password
-    if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match";
-    }
+    if (!formData.username) newErrors.username = "Username is required";
+    if (!formData.email) newErrors.email = "Email is required";
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) newErrors.email = "Invalid email format";
+    if (!formData.mobile) newErrors.mobile = "Mobile is required";
+    if (!formData.password) newErrors.password = "Password is required";
+    else if (formData.password.length < 8) newErrors.password = "Minimum 8 characters";
+    if (formData.password !== formData.confirmPassword) newErrors.confirmPassword = "Passwords match failure";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -81,9 +60,7 @@ const Register = () => {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    if (errors[e.target.name]) {
-      setErrors({ ...errors, [e.target.name]: null });
-    }
+    if (errors[e.target.name]) setErrors({ ...errors, [e.target.name]: null });
   };
 
   const handleSubmit = async (e) => {
@@ -93,32 +70,28 @@ const Register = () => {
     setLoading(true);
 
     try {
-      await axios.post('/api/auth/register', {
+      await API.post('/api/auth/register', {
         username: formData.username,
         email: formData.email,
         mobile: formData.mobile,
         password: formData.password
       });
 
-      toast.success('Registration successful!', {
-        icon: '✅',
-        style: {
-          borderRadius: '15px',
-          background: '#1e293b',
-          color: '#fff',
-          border: '1px solid rgba(255,255,255,0.1)'
-        }
+      toast.success('Access Granted. Redirecting...', {
+        style: { borderRadius: '15px', background: '#1e293b', color: '#fff' }
       });
-      navigate('/login');
+      
+      setTimeout(() => navigate('/login'), 2000);
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Initialization failed', {
-        style: {
-          borderRadius: '15px',
-          background: '#450a0a',
-          color: '#fca5a5',
-          border: '1px solid #7f1d1d'
-        }
-      });
+      if (error.response?.status === 409) {
+        setAlert({
+          show: true,
+          message: 'USER IDENTITY ALREADY REGISTERED IN CORE FILES',
+          type: 'error'
+        });
+      } else {
+        toast.error(error.response?.data?.message || 'Initialization failed');
+      }
     } finally {
       setLoading(false);
     }
@@ -129,6 +102,13 @@ const Register = () => {
   return (
     <div className="min-h-screen flex items-center justify-center p-6 relative bg-[#030712] overflow-hidden">
       <AnimatedBackground />
+      
+      <CenteredAlert 
+        isOpen={alert.show} 
+        onClose={() => setAlert({ ...alert, show: false })} 
+        message={alert.message} 
+        type={alert.type} 
+      />
 
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
@@ -246,23 +226,106 @@ const Register = () => {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-1">Password</label>
-              <div className="relative group/input">
-                <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-white/20 group-focus-within/input:text-primary transition-colors">
-                  <Lock className="h-4 w-4" />
+            <div className="grid grid-cols-2 gap-5">
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-1">Password</label>
+                <div className="relative group/input">
+                  <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-white/20 group-focus-within/input:text-primary transition-colors">
+                    <Lock className="h-4 w-4" />
+                  </div>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    name="password"
+                    required
+                    placeholder="••••••••"
+                    value={formData.password}
+                    onChange={handleChange}
+                    className={`w-full h-14 bg-white/5 border ${errors.password ? 'border-red-500/50' : 'border-white/10'} rounded-2xl pl-10 pr-10 text-white placeholder:text-white/10 input-glow text-sm font-bold`}
+                  />
                 </div>
-                <input
-                  type={showPassword ? 'text' : 'password'}
-                  name="password"
-                  required
-                  placeholder="••••••••"
-                  value={formData.password}
-                  onChange={handleChange}
-                  className={`w-full h-14 bg-white/5 border ${errors.password ? 'border-red-500/50' : 'border-white/10'} rounded-2xl pl-12 pr-12 text-white placeholder:text-white/10 input-glow text-sm font-bold`}
-                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-1">Confirm</label>
+                <div className="relative group/input">
+                  <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-white/20 group-focus-within/input:text-primary transition-colors">
+                    <ShieldCheck className="h-4 w-4" />
+                  </div>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    name="confirmPassword"
+                    required
+                    placeholder="••••••••"
+                    value={formData.confirmPassword}
+                    onChange={handleChange}
+                    className={`w-full h-14 bg-white/5 border ${errors.confirmPassword ? 'border-red-500/50' : 'border-white/10'} rounded-2xl pl-10 pr-10 text-white placeholder:text-white/10 input-glow text-sm font-bold`}
+                  />
+                </div>
               </div>
             </div>
+
+            {/* Password Strength Indicator */}
+            <AnimatePresence>
+              {formData.password && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-3 px-1"
+                >
+                  <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                    <span className="text-white/20">Entropy Analysis</span>
+                    <motion.span 
+                      key={passwordStrength}
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      style={{ 
+                        color: 
+                          passwordStrength === 1 ? '#ef4444' : 
+                          passwordStrength === 2 ? '#f97316' : 
+                          passwordStrength === 3 ? '#eab308' : 
+                          passwordStrength === 4 ? '#3b82f6' : 
+                          '#22c55e'
+                      }}
+                    >
+                      {passwordStrength <= 1 ? 'Critical' : 
+                       passwordStrength === 2 ? 'Weak' : 
+                       passwordStrength === 3 ? 'Fair' : 
+                       passwordStrength === 4 ? 'Good' : 'Strong'}
+                    </motion.span>
+                  </div>
+                  <div className="flex gap-2 h-1.5">
+                    {[...Array(5)].map((_, i) => (
+                      <div key={i} className="flex-1 h-full bg-white/5 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ 
+                            width: i < passwordStrength ? '100%' : '0%',
+                            backgroundColor: 
+                              passwordStrength === 1 ? '#ef4444' : 
+                              passwordStrength === 2 ? '#f97316' : 
+                              passwordStrength === 3 ? '#eab308' : 
+                              passwordStrength === 4 ? '#3b82f6' : 
+                              '#22c55e'
+                          }}
+                          transition={{ duration: 0.4, delay: i * 0.1 }}
+                          className="h-full"
+                          style={{
+                            boxShadow: i < passwordStrength ? `0 0 10px ${
+                              passwordStrength === 1 ? '#ef4444' : 
+                              passwordStrength === 2 ? '#f97316' : 
+                              passwordStrength === 3 ? '#eab308' : 
+                              passwordStrength === 4 ? '#3b82f6' : 
+                              '#22c55e'
+                            }44` : 'none'
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             <motion.button
               whileHover={{ scale: 1.01, x: 5 }}

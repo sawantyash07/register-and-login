@@ -16,9 +16,20 @@ app.use(express.json());
 // Routes
 app.use('/api/auth', authRoutes);
 
-// Root route
+// Root route - API Documentation
 app.get('/', (req, res) => {
-  res.send('API is running...');
+  res.status(200).json({
+    message: 'Neural Core API is active',
+    version: '1.0.0',
+    endpoints: {
+      auth: {
+        register: 'POST /api/auth/register',
+        login: 'POST /api/auth/login',
+        reset: 'POST /api/auth/reset-password',
+        me: 'GET /api/auth/me (Protected)'
+      }
+    }
+  });
 });
 
 const PORT = process.env.PORT || 5000;

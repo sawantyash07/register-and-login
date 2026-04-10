@@ -1,14 +1,23 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import API from '../api/axios';
 import toast from 'react-hot-toast';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Mail, Lock, Eye, EyeOff, Loader2, ArrowRight, User, ShieldCheck } from 'lucide-react';
 import AnimatedBackground from '../components/AnimatedBackground';
+import { useAuth } from '../context/AuthContext';
+import CenteredAlert from '../components/CenteredAlert';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login, user } = useAuth();
   const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState({ show: false, message: '', type: 'error' });
+
+  React.useEffect(() => {
+    if (user) navigate('/quiz');
+  }, [user, navigate]);
+
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     identifier: '',
@@ -26,52 +35,35 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post('/api/auth/login', {
+      const response = await API.post('/api/auth/login', {
         identifier: formData.identifier,
         password: formData.password
       });
 
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      login(response.data.user, response.data.token);
       
-      toast.success(`Welcome back, ${response.data.user.username}!`, {
-        icon: '🚀',
+      toast.success(`Access Authorized. Welcome back, ${response.data.user.username}!`, {
         duration: 4000,
-        style: {
-          borderRadius: '15px',
-          background: '#1e293b',
-          color: '#fff',
-          border: '1px solid rgba(255,255,255,0.1)'
-        }
+        style: { borderRadius: '15px', background: '#1e293b', color: '#fff' }
       });
       navigate('/quiz');
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Unauthorized access', {
-        duration: 4000,
-        style: {
-          borderRadius: '15px',
-          background: '#450a0a',
-          color: '#fca5a5',
-          border: '1px solid #7f1d1d'
-        }
+      const status = error.response?.status;
+      let message = 'SYSTEM ACCESS DENIED. INVALID CREDENTIALS.';
+      
+      if (status === 404) {
+        message = 'IDENTITY NOT FOUND. PLEASE INITIALIZE REGISTRATION.';
+      }
+
+      setAlert({
+        show: true,
+        message: message,
+        type: 'error'
       });
     } finally {
       setLoading(false);
     }
   };
-
-  const [storedUser, setStoredUser] = useState(null);
-
-  useEffect(() => {
-    const user = localStorage.getItem('user');
-    if (user) {
-      try {
-        setStoredUser(JSON.parse(user));
-      } catch (e) {
-        console.error("Failed to parse stored user");
-      }
-    }
-  }, []);
 
   const eyeVariants = {
     closed: { scaleY: 0.1, opacity: 0.5 },
@@ -81,6 +73,13 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center p-6 relative bg-[#030712] overflow-hidden">
       <AnimatedBackground />
+
+      <CenteredAlert 
+        isOpen={alert.show} 
+        onClose={() => setAlert({ ...alert, show: false })} 
+        message={alert.message} 
+        type={alert.type} 
+      />
 
       <motion.div
         initial={{ opacity: 0, scale: 0.98 }}
